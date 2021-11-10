@@ -2,6 +2,9 @@ package br.senai.sp.jandira.ui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -14,13 +17,19 @@ import javax.swing.JList;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+
+import br.senai.sp.jandira.model.Aluno;
 import br.senai.sp.jandira.model.Periodo;
+import br.senai.sp.jandira.repository.AlunoRepository;
 
 public class FrameCadastroAlunos extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField txtMatricula;
 	private JTextField txtNome;
+	
+	private int posicao;
 
 	public FrameCadastroAlunos() {
 		setTitle("Cadastro de Alunos");
@@ -54,7 +63,19 @@ public class FrameCadastroAlunos extends JFrame {
 		contentPane.add(lblPeriodo);
 		
 		JComboBox comboPeriodo = new JComboBox();
-		comboPeriodo.setModel(new DefaultComboBoxModel(Periodo.values()));
+		
+		//Criar o DefaultCombobox, que é um vetor que carrega os dados que serão exibidos no combo
+		DefaultComboBoxModel<String> comboModelPeriodo = 
+				new DefaultComboBoxModel<String>();
+		
+		
+		//Carregar o comboModel com as descrições do Periodo
+		for (Periodo descricao : Periodo.values()) {
+			comboModelPeriodo.addElement(descricao.getDescricao());
+		}
+		
+		//comboPeriodo.setModel(new DefaultComboBoxModel(Periodo.values()));
+		comboPeriodo.setModel(comboModelPeriodo);
 		comboPeriodo.setBounds(96, 97, 106, 22);
 		contentPane.add(comboPeriodo);
 		
@@ -72,5 +93,45 @@ public class FrameCadastroAlunos extends JFrame {
 		
 		JList listAlunos = new JList();
 		scrollPane.setViewportView(listAlunos);
+		
+		//criar o model que vai exibir os alunos na JList
+		DefaultListModel<String> modelAlunos = new DefaultListModel<String>();
+		
+		//Definir o modelAlunos como model do JList
+		listAlunos.setModel(modelAlunos);
+		
+		//Criar uma turma que é um repositório de alunos
+		AlunoRepository turma = new AlunoRepository(3);
+		
+		
+		
+		btnSalvar.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				Aluno aluno = new Aluno();
+				aluno.setMatricula(txtMatricula.getText());
+				aluno.setNome(txtNome.getText());
+				
+				turma.gravar(aluno, posicao);
+				
+				modelAlunos.addElement(aluno.getNome());
+				
+				posicao++;
+				
+				
+			}
+		});
+		
+		//action listener para novo botão
+		
+		for (Aluno aluno : turma.listarTodos()) {
+			System.out.println(aluno.getNome());
+			System.out.println(aluno.getMatricula());
+			System.out.println("-----------------------");
+		}
+		
 	}
+	
 }
